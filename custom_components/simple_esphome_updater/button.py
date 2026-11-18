@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from esphome_dashboard_api import ConfiguredDevice
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -64,6 +65,7 @@ class UpdaterButton(CoordinatorEntity[UpdaterCoordinator], ButtonEntity):
     """One action for one dashboard device."""
 
     _attr_has_entity_name = True
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
     entity_description: UpdaterButtonDescription
 
     def __init__(

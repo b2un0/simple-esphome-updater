@@ -11,11 +11,11 @@ Per device:
 
 | Entity | Does |
 |---|---|
-| **Firmware** (update entity) | installed vs. available ESPHome version. *Install* = compile + OTA upload, with progress in percent (compile 0-50 %, upload 50-100 %) |
-| **Flash** (button) | compile + OTA upload on every press, even without a new version |
-| **Compile** (button) | compile only, no upload |
+| **ESPHome firmware** (update entity) | installed vs. available ESPHome version. *Install* = compile + OTA upload, with progress in percent (compile 0-50 %, upload 50-100 %) |
+| **ESPHome flash** (button, diagnostic) | compile + OTA upload on every press, even without a new version |
+| **ESPHome compile** (button, diagnostic) | compile only, no upload |
 
-Use **Flash** to roll out changes that do not bump the ESPHome version, e.g. updated remote packages or `external_components`.
+Use **ESPHome flash** to roll out changes that do not bump the ESPHome version, e.g. updated remote packages or `external_components`.
 
 Each device carries the MAC address of the ESPHome device as connection. Home Assistant (2026.8+) keeps one device per integration, and links devices with the same MAC: the ESPHome device page shows this device as linked.
 

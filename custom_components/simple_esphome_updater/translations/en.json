@@ -34,11 +34,11 @@
   },
   "entity": {
     "update": {
-      "firmware": { "name": "Firmware" }
+      "firmware": { "name": "ESPHome firmware" }
     },
     "button": {
-      "flash": { "name": "Flash" },
-      "compile": { "name": "Compile" }
+      "flash": { "name": "ESPHome flash" },
+      "compile": { "name": "ESPHome compile" }
     }
   }
 }

@@ -18,6 +18,7 @@ Rules for agents working in this repo.
 
 - Marketplace/HACS rules: `manifest.json` needs `domain`, `name`, `version`, `documentation`, `issue_tracker`, `codeowners`; `hacs.json` with `name`; `brand/icon.png`; release tag `vX.Y.Z` equals manifest version.
 - CI must pass without ignored checks: HACS action, hassfest, ruff (`ruff check`, `ruff format --check`).
+- Entity names carry the `ESPHome` prefix so they differ from the device's own entities. Buttons are `EntityCategory.DIAGNOSTIC`.
 - Strings only in `translations/en.json`. Entity names via `translation_key`.
 - No blocking I/O in the event loop. Long jobs run as background tasks, never inside `async_press`.
 - Errors surface as persistent notification with log tail, not silent.

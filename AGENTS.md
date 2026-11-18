@@ -22,3 +22,4 @@ Rules for agents working in this repo.
 - No blocking I/O in the event loop. Long jobs run as background tasks, never inside `async_press`.
 - Errors surface as persistent notification with log tail, not silent.
 - Keep the README short and in sync with behaviour.
+- Icon source is `assets/icon.svg`. After changing it, regenerate `brand/icon.png` (256x256) and `brand/icon@2x.png` (512x512). Do not use Home Assistant or ESPHome logos.

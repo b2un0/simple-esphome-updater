@@ -1,5 +1,7 @@
 # Simple EspHome Updater
 
+<img src="assets/icon.svg" alt="icon" width="96">
+
 [![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=b2un0&repository=simple-esphome-updater&category=integration)
 [![Validate](https://github.com/b2un0/simple-esphome-updater/actions/workflows/validate.yml/badge.svg)](https://github.com/b2un0/simple-esphome-updater/actions/workflows/validate.yml)
 

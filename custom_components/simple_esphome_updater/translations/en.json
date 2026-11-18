@@ -1,0 +1,42 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ESPHome Dashboard",
+        "data": {
+          "url": "Dashboard URL",
+          "username": "Username",
+          "password": "Password"
+        },
+        "data_description": {
+          "url": "For example http://192.168.1.10:6052",
+          "username": "Leave empty if the dashboard has no login",
+          "password": "Leave empty if the dashboard has no login"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach the dashboard",
+      "invalid_auth": "Invalid username or password",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This dashboard is already configured",
+      "reauth_successful": "Reauthentication successful"
+    }
+  },
+  "entity": {
+    "button": {
+      "update": { "name": "Update" },
+      "flash": { "name": "Flash" },
+      "compile": { "name": "Compile" }
+    }
+  }
+}

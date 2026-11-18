@@ -1,4 +1,4 @@
-"""Buttons: update, flash, compile."""
+"""Buttons: flash, compile."""
 
 from __future__ import annotations
 
@@ -8,14 +8,11 @@ from dataclasses import dataclass
 from esphome_dashboard_api import ConfiguredDevice
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers.device_registry import DeviceInfo, format_mac
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import UpdaterConfigEntry
-from .const import DOMAIN
-from .coordinator import UpdaterCoordinator
+from .coordinator import UpdaterCoordinator, device_info
 
 PARALLEL_UPDATES = 0
 
@@ -29,19 +26,7 @@ class UpdaterButtonDescription(ButtonEntityDescription):
     needs: Callable[[ConfiguredDevice], bool] = lambda _dev: True
 
 
-def _update_available(dev: ConfiguredDevice) -> bool:
-    if not dev.get("address"):
-        return False
-    deployed, latest = dev.get("deployed_version"), dev.get("current_version")
-    return bool(
-        dev.get("update_available") or (deployed and latest and deployed != latest)
-    )
-
-
 BUTTONS = (
-    UpdaterButtonDescription(
-        key="update", translation_key="update", upload=True, needs=_update_available
-    ),
     UpdaterButtonDescription(
         key="flash",
         translation_key="flash",
@@ -93,23 +78,7 @@ class UpdaterButton(CoordinatorEntity[UpdaterCoordinator], ButtonEntity):
         self._name = name
         entry_id = coordinator.config_entry.entry_id
         self._attr_unique_id = f"{entry_id}_{name}_{description.key}"
-        self._attr_device_info = self._device_info(name, entry_id)
-
-    def _device_info(self, name: str, entry_id: str) -> DeviceInfo:
-        """Device carries the MAC as connection, so HA links it to the ESPHome one."""
-        dev = self.coordinator.data[name]
-        macs = {
-            (dr.CONNECTION_NETWORK_MAC, format_mac(mac))
-            for mac in (dev.get("mac_address"), dev.get("ethernet_mac"))
-            if mac
-        }
-        return DeviceInfo(
-            connections=macs,
-            identifiers={(DOMAIN, f"{entry_id}_{name}")},
-            name=dev.get("friendly_name") or name,
-            manufacturer="ESPHome",
-            configuration_url=self.coordinator.api.url,
-        )
+        self._attr_device_info = device_info(coordinator, name)
 
     @property
     def _device(self) -> ConfiguredDevice | None:

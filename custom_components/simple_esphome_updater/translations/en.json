@@ -33,8 +33,10 @@
     }
   },
   "entity": {
+    "update": {
+      "firmware": { "name": "Firmware" }
+    },
     "button": {
-      "update": { "name": "Update" },
       "flash": { "name": "Flash" },
       "compile": { "name": "Compile" }
     }

@@ -11,7 +11,7 @@ from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .coordinator import UpdaterCoordinator
 
-PLATFORMS = [Platform.BUTTON]
+PLATFORMS = [Platform.BUTTON, Platform.UPDATE]
 
 type UpdaterConfigEntry = ConfigEntry[UpdaterCoordinator]
 

@@ -1,7 +1,6 @@
 {
   "entity": {
     "button": {
-      "update": { "default": "mdi:update" },
       "flash": { "default": "mdi:flash" },
       "compile": { "default": "mdi:hammer-wrench" }
     }

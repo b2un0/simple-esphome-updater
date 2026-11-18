@@ -1,4 +1,6 @@
 {
+  "domain": "simple_esphome_updater",
+  "name": "Simple EspHome Updater",
   "categories": [
     "diy_makers.boards_hardware"
   ],
@@ -7,10 +9,8 @@
   ],
   "config_flow": true,
   "documentation": "https://github.com/b2un0/simple-esphome-updater",
-  "domain": "simple_esphome_updater",
   "integration_type": "service",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/b2un0/simple-esphome-updater/issues",
-  "name": "Simple EspHome Updater",
   "version": "0.1.0"
 }

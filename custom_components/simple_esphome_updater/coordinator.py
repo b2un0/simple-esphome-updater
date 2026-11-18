@@ -129,6 +129,11 @@ class UpdaterCoordinator(DataUpdateCoordinator[dict[str, ConfiguredDevice]]):
             await self.async_request_refresh()
 
 
+def is_reachable(dev: ConfiguredDevice) -> bool:
+    """False only if the dashboard says the device is offline."""
+    return dev.get("state") != "offline"
+
+
 def device_info(coordinator: UpdaterCoordinator, name: str) -> DeviceInfo:
     """Device carries the MAC as connection, so HA links it to the ESPHome one."""
     dev = coordinator.data[name]

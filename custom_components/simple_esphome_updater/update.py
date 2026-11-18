@@ -10,7 +10,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import UpdaterConfigEntry
-from .coordinator import UpdaterCoordinator, device_info
+from .coordinator import UpdaterCoordinator, device_info, is_reachable
 
 PARALLEL_UPDATES = 0
 
@@ -57,8 +57,12 @@ class UpdaterUpdate(CoordinatorEntity[UpdaterCoordinator], UpdateEntity):
 
     @property
     def available(self) -> bool:
-        """Unavailable once the device is gone from the dashboard."""
-        return super().available and self._name in self.coordinator.data
+        """Unavailable if gone from the dashboard or reported offline."""
+        return (
+            super().available
+            and self._name in self.coordinator.data
+            and is_reachable(self._device)
+        )
 
     @property
     def installed_version(self) -> str | None:

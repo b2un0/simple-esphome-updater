@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import UpdaterConfigEntry
-from .coordinator import UpdaterCoordinator, device_info
+from .coordinator import UpdaterCoordinator, device_info, is_reachable
 
 PARALLEL_UPDATES = 0
 
@@ -32,7 +32,7 @@ BUTTONS = (
         key="flash",
         translation_key="flash",
         upload=True,
-        needs=lambda dev: bool(dev.get("address")),
+        needs=lambda dev: bool(dev.get("address")) and is_reachable(dev),
     ),
     UpdaterButtonDescription(key="compile", translation_key="compile", upload=False),
 )

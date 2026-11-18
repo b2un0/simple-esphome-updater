@@ -37,7 +37,8 @@ Home Assistant must reach the dashboard over HTTP. The dashboard must reach the 
 
 ## Behaviour
 
-- Devices are read from the dashboard every 5 minutes; new devices get buttons automatically.
+- Online state comes from the dashboard. Offline devices: *ESPHome firmware* and *ESPHome flash* are unavailable. *ESPHome compile* stays available.
+- Devices are read from the dashboard every minute; new devices get buttons automatically.
 - A press starts a background job. Buttons are unavailable and the update entity shows progress while it runs. One job at a time per dashboard, others wait.
 - On failure a persistent notification shows the last log lines.
 

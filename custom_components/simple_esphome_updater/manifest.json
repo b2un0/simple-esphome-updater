@@ -12,5 +12,5 @@
   "integration_type": "service",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/b2un0/simple-esphome-updater/issues",
-  "version": "1.1.0-beta.1"
+  "version": "1.1.0"
 }

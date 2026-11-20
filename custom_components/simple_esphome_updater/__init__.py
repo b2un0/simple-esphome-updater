@@ -8,7 +8,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from homeassistant.helpers.storage import Store
 
+from .const import DOMAIN
 from .coordinator import UpdaterCoordinator
 
 PLATFORMS = [Platform.BUTTON, Platform.UPDATE]
@@ -37,9 +39,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: UpdaterConfigEntry) -> b
     )
     coordinator = UpdaterCoordinator(hass, entry, api)
     await coordinator.async_config_entry_first_refresh()
+    coordinator.async_remove_unadmitted()
     entry.runtime_data = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     return True
+
+
+async def _async_options_updated(
+    hass: HomeAssistant, entry: UpdaterConfigEntry
+) -> None:
+    """Apply the filter through a platform reload."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: UpdaterConfigEntry) -> None:
+    """Delete admission history when the dashboard entry is removed."""
+    await Store(hass, 1, f"{DOMAIN}.{entry.entry_id}.admitted").async_remove()
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: UpdaterConfigEntry) -> bool:

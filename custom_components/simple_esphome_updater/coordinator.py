@@ -15,10 +15,18 @@ from homeassistant.components import persistent_notification
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo, format_mac
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN, LOG_TAIL_LINES, REQUEST_TIMEOUT, SCAN_INTERVAL_SECONDS
+from .const import (
+    CONF_ONLY_ONLINE,
+    DOMAIN,
+    LOG_TAIL_LINES,
+    REQUEST_TIMEOUT,
+    SCAN_INTERVAL_SECONDS,
+)
 
 if TYPE_CHECKING:
     from . import UpdaterConfigEntry
@@ -51,10 +59,17 @@ class UpdaterCoordinator(DataUpdateCoordinator[dict[str, ConfiguredDevice]]):
             update_interval=timedelta(seconds=SCAN_INTERVAL_SECONDS),
         )
         self.api = api
+        self._admitted: set[str] = set()
+        self._admission_store = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}.admitted")
         self._lock = asyncio.Lock()
         self.active: set[str] = set()
         # 0-100 while a job runs, None if no percentage seen yet.
         self.progress: dict[str, int | None] = {}
+
+    async def _async_setup(self) -> None:
+        """Restore names with explicit online evidence before the first poll."""
+        if stored := await self._admission_store.async_load():
+            self._admitted = set(stored["names"])
 
     async def _async_update_data(self) -> dict[str, ConfiguredDevice]:
         try:
@@ -66,7 +81,53 @@ class UpdaterCoordinator(DataUpdateCoordinator[dict[str, ConfiguredDevice]]):
             raise UpdateFailed(f"Dashboard error: {err.status}") from err
         except (ClientError, TimeoutError) as err:
             raise UpdateFailed(f"Dashboard unreachable: {err}") from err
-        return {dev["name"]: dev for dev in devices["configured"]}
+        newly_online = {
+            dev["name"] for dev in devices["configured"] if dev.get("state") == "online"
+        } - self._admitted
+        if newly_online:
+            admitted = self._admitted | newly_online
+            await self._admission_store.async_save({"names": sorted(admitted)})
+            self._admitted = admitted
+        return {
+            dev["name"]: dev
+            for dev in devices["configured"]
+            if not self.config_entry.options.get(CONF_ONLY_ONLINE, False)
+            or dev["name"] in self._admitted
+        }
+
+    @callback
+    def async_remove_unadmitted(self) -> None:
+        """Remove only this entry's entities and exclusively owned devices."""
+        if not self.config_entry.options.get(CONF_ONLY_ONLINE, False):
+            return
+        entry_id = self.config_entry.entry_id
+        prefix = f"{entry_id}_"
+        entities = er.async_get(self.hass)
+        for entity in er.async_entries_for_config_entry(entities, entry_id):
+            if entity.platform != DOMAIN or not entity.unique_id.startswith(prefix):
+                continue
+            name, _, action = entity.unique_id[len(prefix) :].rpartition("_")
+            if action in {"compile", "flash", "update"} and name not in self._admitted:
+                entities.async_remove(entity.entity_id)
+        devices = dr.async_get(self.hass)
+        for device in dr.async_entries_for_config_entry(devices, entry_id):
+            names = {
+                identifier[len(prefix) :]
+                for domain, identifier in device.identifiers
+                if domain == DOMAIN and identifier.startswith(prefix)
+            }
+            if not names or names & self._admitted:
+                continue
+            # HA 2026.8+ devices belong to one entry. Never remove linked peers
+            # or an entry with entities/identifiers from another integration.
+            if (
+                device.config_entry_id == entry_id
+                and all(domain == DOMAIN for domain, _ in device.identifiers)
+                and not er.async_entries_for_device(
+                    entities, device.id, include_disabled_entities=True
+                )
+            ):
+                devices.async_remove_device(device.id)
 
     @callback
     def start_job(self, name: str, *, upload: bool) -> None:

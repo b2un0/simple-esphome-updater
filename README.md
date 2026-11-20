@@ -32,17 +32,30 @@ Each device carries the MAC address of the ESPHome device as connection. Home As
 | URL | Dashboard address, e.g. `http://192.168.1.10:6052` |
 | Username | Dashboard login, empty if none |
 | Password | Dashboard login, empty if none |
+| Only online devices | Off by default. Admit devices only after the dashboard explicitly reports them online; applies to update entities and both buttons. Editable later via **Configure**. |
 
 Home Assistant must reach the dashboard over HTTP. The dashboard must reach the devices (OTA).
 
 ## Behaviour
 
 - Online state comes from the dashboard. Offline devices: *ESPHome firmware* and *ESPHome flash* are unavailable. *ESPHome compile* stays available.
-- Devices are read from the dashboard every minute; new devices get buttons automatically.
+- Devices are read from the dashboard every minute; newly eligible devices get update entities and buttons automatically.
+- With **Only online devices** enabled, never-seen-online configurations (including blueprints and unknown/missing states) have no entities or devices in this integration. Once explicitly seen online, a device stays admitted across outages, integration reloads, and Home Assistant restarts. Offline firmware/flash actions remain unavailable; compile stays available. Admission history is stored per dashboard entry, including online observations while the option is off.
+- Changing the option reloads the integration. Enabling it removes excluded entities and exclusively owned device registry entries, never another integration's devices or entities. Existing registry entries alone do not prove a device was online: after upgrading, a real device offline before its first observed online poll will be excluded until it comes online. Disabling the option includes all configured devices again. Names identify devices; renaming a dashboard device requires a new online observation. Removing the integration entry clears its admission history.
 - A press starts a background job. Buttons are unavailable and the update entity shows progress while it runs. One job at a time per dashboard, others wait.
 - On failure a persistent notification shows the last log lines.
 
 ## Development
+
+Tests use real Home Assistant dependencies (Python 3.14):
+
+```sh
+python -m venv .venv
+.venv/bin/pip install -r requirements-test.txt
+.venv/bin/pytest tests -q
+.venv/bin/ruff check .
+.venv/bin/ruff format --check .
+```
 
 CI: HACS action, hassfest, ruff. Release: bump `version` in `manifest.json`, tag `vX.Y.Z`.
 

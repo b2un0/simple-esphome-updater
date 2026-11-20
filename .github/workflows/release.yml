@@ -17,6 +17,12 @@ jobs:
         run: |
           v=$(jq -r .version custom_components/simple_esphome_updater/manifest.json)
           [ "v$v" = "${GITHUB_REF_NAME}" ] || { echo "tag ${GITHUB_REF_NAME} != manifest v$v"; exit 1; }
-      - run: gh release create "${GITHUB_REF_NAME}" --generate-notes
+      - name: Publish release
+        run: |
+          flags=()
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            flags+=(--prerelease --latest=false)
+          fi
+          gh release create "${GITHUB_REF_NAME}" --generate-notes "${flags[@]}"
         env:
           GH_TOKEN: ${{ github.token }}
